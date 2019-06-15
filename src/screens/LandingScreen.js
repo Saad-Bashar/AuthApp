@@ -12,28 +12,27 @@ export default class LandingScreen extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			loading: false
-		}
+			loading: false,
+		};
 	}
 
-	// componentWillMount() {
-	//  	// Listen for authentication state to change.
-	// 	 firebase.auth().onAuthStateChanged(user => {
-	// 		 this.setState({
-	// 			 loading: false
-	// 		 });
+	componentWillMount() {
+		// Listen for authentication state to change.
+		firebase.auth().onAuthStateChanged(user => {
+			this.setState({
+				loading: false,
+			});
 
-	// 		if (user != null) {
-	// 			this.props.navigation.replace('ProfileScreen')
-	// 		}
+			if (user != null) {
+				this.props.navigation.replace('ProfileScreen');
+			}
 
-	// 		// Do other things
-	// 	}); 
-	// }
-	
+			// Do other things
+		});
+	}
 
 	async FacebookLogin() {
-		// First we connect with facebook to get user data 
+		// First we connect with facebook to get user data
 		const { type, token } = await Facebook.logInWithReadPermissionsAsync('341408809899366', {
 			permission: 'public_profile',
 		});
@@ -49,16 +48,19 @@ export default class LandingScreen extends Component {
 
 			const userID = facebookProfile.user.uid;
 
-			firebase.database().ref('users/' + userID).set({
-				name: facebookProfile.user.displayName,
-				email: facebookProfile.user.email,
-				photo: facebookProfile.user.photoURL
-			})
+			firebase
+				.database()
+				.ref('users/' + userID)
+				.set({
+					name: facebookProfile.user.displayName,
+					email: facebookProfile.user.email,
+					photo: facebookProfile.user.photoURL,
+				});
 
 			// Listen for authentication state to change.
 			firebase.auth().onAuthStateChanged(user => {
 				if (user != null) {
-					this.props.navigation.replace('ProfileScreen')
+					this.props.navigation.replace('ProfileScreen');
 				}
 
 				// Do other things
@@ -69,13 +71,12 @@ export default class LandingScreen extends Component {
 	render() {
 		const { loading } = this.state;
 
-		if(loading) {
+		if (loading) {
 			return (
 				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 					<ActivityIndicator size="large" />
 				</View>
-				
-			)
+			);
 		}
 		return (
 			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -84,7 +85,11 @@ export default class LandingScreen extends Component {
 					backgroundColor="blue"
 					title={'Login with Facebook'}
 				/>
-				<Button backgroundColor="orange" title={'Login with Email'} />
+				<Button
+					onButtonPress={() => this.props.navigation.navigate('SignInScreen')}
+					backgroundColor="orange"
+					title={'Login with Email'}
+				/>
 				<Button onButtonPress={() => this.props.navigation.navigate('SignUp')} title={'Sign Up  with Email'} />
 			</View>
 		);

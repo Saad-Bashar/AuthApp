@@ -14,86 +14,99 @@ export default class SignUpScreen extends Component {
 			age: '',
 			firstName: '',
 			lastName: '',
-			emailError: null
-		}
+			emailError: null,
+		};
 	}
 
-	handleEmail = (text) => {
+	handleInput = (key, value) => {
 		this.setState({
-			email: text
-		})
-	}
-
-	handlePassword = (text) => {
-		this.setState({
-			password: text
-		})
-	}
-
-	handleFirstName = (text) => {
-		this.setState({
-			firstName: text
-		})
-	}
-
-	handleLastName = (text) => {
-		this.setState({
-			lastName: text
-		})
-	}
-
-	handleAge = (text) => {
-		this.setState({
-			age: text
-		})
-	}
-
-	handleGender = (text) => {
-		this.setState({
-			gender: text
-		})
-	}
+			[key]: value,
+		});
+	};
 
 	checkEmail = () => {
 		const { email } = this.state;
 		const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-		const isValid = re.test(String(email).toLowerCase())
+		const isValid = re.test(String(email).toLowerCase());
 
-		if(!isValid) {
+		if (!isValid) {
 			this.setState({
-				emailError: 'Invalid Email'
-			})
+				emailError: 'Invalid Email',
+			});
 		}
-	}
+	};
 
-	// signUpUser = () => {
-	// 	firebase.auth().createUserWithEmailAndPassword('test@test.com', '12345678').then(user => console.log('user ', user))
-	// }
+	signUpUser = () => {
+		const { email, password, firstName, lastName, age, gender } = this.state;
+		firebase
+			.auth()
+			.createUserWithEmailAndPassword(email, password)
+			.then(user => {
+				console.log('user ', user);
 
-	
+				const userID = user.user.uid;
+
+				firebase
+					.database()
+					.ref('users/' + userID)
+					.set({
+						firstName,
+						lastName,
+						age,
+						gender,
+					});
+			});
+	};
 
 	render() {
 		return (
 			<ScrollView style={{ flex: 1 }}>
 				<View style={{ margin: 25 }}>
-					<Input handleInput={this.handleEmail} onBlur={this.checkEmail} placeholder="Email" error={this.state.emailError} />
-					
-					<Input secureTextEntry={true}  handleInput={this.handlePassword} placeholder="Password" />	
-					
+					<Input
+						handleInput={text => this.handleInput('email', text)}
+						onBlur={this.checkEmail}
+						placeholder="Email"
+						error={this.state.emailError}
+					/>
+
+					<Input
+						handleInput={text => this.handleInput('password', text)}
+						secureTextEntry={true}
+						placeholder="Password"
+					/>
+
 					<View style={{ flexDirection: 'row' }}>
-						<Input customStyle={{ flex: 1, marginRight: 5 }} handleInput={this.handleFirstName} placeholder="First Name" />
-						<Input customStyle={{ flex: 1 }} handleInput={this.handleLastName} placeholder="Last Name" />
+						<Input
+							containerStyle={{ flex: 1 }}
+							customStyle={{ flex: 1, marginRight: 5 }}
+							handleInput={text => this.handleInput('firstName', text)}
+							placeholder="First Name"
+						/>
+						<Input
+							containerStyle={{ flex: 1 }}
+							customStyle={{ flex: 1 }}
+							handleInput={text => this.handleInput('lastName', text)}
+							placeholder="Last Name"
+						/>
 					</View>
 
 					<View style={{ flexDirection: 'row' }}>
-						<Input customStyle={{ flex: 1, marginRight: 5 }} handleInput={this.handleAge} placeholder="Age" />
-						<Input customStyle={{ flex: 1 }} handleInput={this.handleGender} placeholder="Gender" />
+						<Input
+							containerStyle={{ flex: 1 }}
+							customStyle={{ flex: 1, marginRight: 5 }}
+							handleInput={text => this.handleInput('age', text)}
+							placeholder="Age"
+						/>
+						<Input
+							containerStyle={{ flex: 1 }}
+							customStyle={{ flex: 1 }}
+							handleInput={text => this.handleInput('gender', text)}
+							placeholder="Gender"
+						/>
 					</View>
 
 					<Button onButtonPress={this.signUpUser} title="Sign Up" />
-
 				</View>
-				
 			</ScrollView>
 		);
 	}
